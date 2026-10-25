@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>番茄钟 · Pomodoro</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex min-h-screen flex-col items-center justify-center bg-slate-900 px-4 text-white">
+<!-- 背景光晕 -->
+<div class="pointer-events-none absolute left-1/4 top-1/4 h-72 w-72 rounded-full bg-red-500/15 blur-3xl"></div>
+<div class="pointer-events-none absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-rose-400/10 blur-3xl"></div>
+
+<h1 class="text-2xl font-black tracking-wide">🍅 番茄钟</h1>
+<p class="mt-1 text-xs text-slate-400">Pomodoro Timer · 保持专注</p>
+
+<!-- 模式标签 -->
+<div class="mt-6 flex gap-2">
+  <button class="rounded-full bg-red-500 px-4 py-1.5 text-xs font-semibold shadow-lg shadow-red-500/30">专注 25min</button>
+  <button class="rounded-full bg-white/10 px-4 py-1.5 text-xs font-medium text-slate-300">短休息 5min</button>
+  <button class="rounded-full bg-white/10 px-4 py-1.5 text-xs font-medium text-slate-300">长休息 15min</button>
+</div>
+
+<!-- 圆形倒计时：SVG 进度环 -->
+<div class="relative mt-10 h-72 w-72">
+  <svg class="h-full w-full -rotate-90" viewBox="0 0 200 200">
+    <circle cx="100" cy="100" r="88" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="10"/>
+    <circle id="ring" cx="100" cy="100" r="88" fill="none" stroke="#ef4444" stroke-width="10"
+      stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="139"
+      style="transition: stroke-dashoffset 1s linear; filter: drop-shadow(0 0 6px rgba(239,68,68,.5));"/>
+  </svg>
+  <div class="absolute inset-0 flex flex-col items-center justify-center">
+    <span id="timeText" class="text-6xl font-black tabular-nums tracking-wider">18:45</span>
+    <span id="stateText" class="mt-3 flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-medium tracking-widest text-slate-300">
+      <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>暂停中 · FOCUSING
+    </span>
+  </div>
+</div>
+
+<!-- 控制按钮 -->
+<div class="mt-10 flex items-center gap-4">
+  <button onclick="resetTimer()" title="重置"
+    class="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-slate-300 transition hover:bg-white/20">
+    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M20 9a8 8 0 00-14.5-3M4 15a8 8 0 0014.5 3"/></svg>
+  </button>
+  <button id="startBtn" onclick="toggleTimer()"
+    class="flex h-16 w-16 items-center justify-center rounded-full bg-red-500 shadow-lg shadow-red-500/40 transition hover:scale-105 active:scale-95">
+    <svg id="playIcon" class="ml-1 h-7 w-7" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    <svg id="pauseIcon" class="hidden h-7 w-7" fill="currentColor" viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+  </button>
+  <button title="跳过"
+    class="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-slate-300 transition hover:bg-white/20">
+    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6h2v12h-2z"/></svg>
+  </button>
+</div>
+
+<p class="mt-8 text-xs text-slate-500">已完成 <span class="font-bold text-red-400">2</span> 个番茄 · 今日目标 8 个</p>
+
+<script>
+const TOTAL = 25 * 60;               // 总时长 25 分钟
+let remain = 18 * 60 + 45;           // 默认定格 18:45，暂停状态
+let running = false, timer = null;
+const C = 553;                        // 圆环周长 2πr
+
+function render() {
+  const m = String(Math.floor(remain / 60)).padStart(2, '0');
+  const s = String(remain % 60).padStart(2, '0');
+  document.getElementById('timeText').textContent = `${m}:${s}`;
+  document.getElementById('ring').style.strokeDashoffset = C * (1 - remain / TOTAL);
+}
+function toggleTimer() {
+  running = !running;
+  document.getElementById('playIcon').classList.toggle('hidden', running);
+  document.getElementById('pauseIcon').classList.toggle('hidden', !running);
+  document.getElementById('stateText').innerHTML = running
+    ? '<span class="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400"></span>专注中 · FOCUSING'
+    : '<span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>暂停中 · FOCUSING';
+  if (running) {
+    timer = setInterval(() => { if (remain > 0) { remain--; render(); } else { clearInterval(timer); } }, 1000);
+  } else clearInterval(timer);
+}
+function resetTimer() {
+  clearInterval(timer); running = false; remain = TOTAL;
+  document.getElementById('playIcon').classList.remove('hidden');
+  document.getElementById('pauseIcon').classList.add('hidden');
+  render();
+}
+render();
+</script>
+</body>
+</html>

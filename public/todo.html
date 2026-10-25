@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>待办事项 · Todo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-100 py-10 px-4 text-slate-800">
+<div class="mx-auto max-w-xl">
+  <h1 class="text-center text-3xl font-black text-slate-800">📝 待办事项</h1>
+  <p class="mt-2 text-center text-sm text-slate-400">Todo List · 让每一天井井有条</p>
+
+  <div class="mt-8 rounded-2xl bg-white p-6 shadow-md">
+    <!-- 输入区 -->
+    <div class="flex gap-3">
+      <input id="todoInput" type="text" placeholder="今天要做什么？"
+        class="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100">
+      <button onclick="addTodo()"
+        class="rounded-xl bg-blue-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-600 active:scale-95">添加</button>
+    </div>
+    <!-- 筛选标签 -->
+    <div class="mt-5 flex gap-2">
+      <button class="filter-btn rounded-full bg-blue-500 px-4 py-1.5 text-xs font-medium text-white" data-filter="all" onclick="setFilter('all')">全部</button>
+      <button class="filter-btn rounded-full bg-slate-100 px-4 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-200" data-filter="active" onclick="setFilter('active')">进行中</button>
+      <button class="filter-btn rounded-full bg-slate-100 px-4 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-200" data-filter="done" onclick="setFilter('done')">已完成</button>
+    </div>
+    <!-- 任务列表 -->
+    <ul id="todoList" class="mt-4 divide-y divide-slate-100"></ul>
+    <p id="counter" class="mt-4 text-right text-xs text-slate-400"></p>
+  </div>
+</div>
+
+<script>
+// 预置假数据：打开页面立即可见
+let todos = [
+  { id: 1, text: '复习数字经济重点：第三章 平台经济', done: true },
+  { id: 2, text: '完成前端作业：Todo 应用截图', done: true },
+  { id: 3, text: '预习 Python 数据分析 pandas 基础', done: false },
+  { id: 4, text: '整理个人作品集项目链接', done: false },
+];
+let nextId = 5, filter = 'all';
+
+function render() {
+  const list = document.getElementById('todoList');
+  const visible = todos.filter(t => filter === 'all' || (filter === 'active' ? !t.done : t.done));
+  list.innerHTML = visible.map(t => `
+    <li class="flex items-center gap-3 py-3">
+      <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggle(${t.id})"
+        class="h-4 w-4 cursor-pointer accent-blue-500">
+      <span class="flex-1 text-sm ${t.done ? 'text-slate-400 line-through' : 'text-slate-700'}">${t.text}</span>
+      <button onclick="removeTodo(${t.id})" class="text-slate-300 transition hover:text-red-400" title="删除">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </li>`).join('') || '<li class="py-8 text-center text-sm text-slate-300">暂无任务</li>';
+  document.getElementById('counter').textContent = `共 ${todos.length} 项 · 已完成 ${todos.filter(t => t.done).length} 项`;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    const on = b.dataset.filter === filter;
+    b.className = 'filter-btn rounded-full px-4 py-1.5 text-xs font-medium ' + (on ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200');
+  });
+}
+function addTodo() {
+  const input = document.getElementById('todoInput');
+  const text = input.value.trim();
+  if (!text) return;
+  todos.push({ id: nextId++, text, done: false });
+  input.value = ''; render();
+}
+function toggle(id) { const t = todos.find(t => t.id === id); if (t) t.done = !t.done; render(); }
+function removeTodo(id) { todos = todos.filter(t => t.id !== id); render(); }
+function setFilter(f) { filter = f; render(); }
+document.getElementById('todoInput').addEventListener('keydown', e => e.key === 'Enter' && addTodo());
+render();
+</script>
+</body>
+</html>

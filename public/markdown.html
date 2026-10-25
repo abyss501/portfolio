@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markdown 笔记</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- marked.js：解析 Markdown -->
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<!-- highlight.js：代码块语法高亮 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<style>
+  /* 预览区排版 */
+  #preview h1 { font-size: 1.6rem; font-weight: 800; color: #1e293b; padding-bottom: .5rem; border-bottom: 2px solid #e2e8f0; margin-bottom: 1rem; }
+  #preview h2 { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin: 1.25rem 0 .5rem; }
+  #preview p { margin: .6rem 0; line-height: 1.8; color: #475569; font-size: .9rem; }
+  #preview strong { color: #0f766e; }
+  #preview ul { list-style: disc; padding-left: 1.4rem; margin: .6rem 0; color: #475569; font-size: .9rem; }
+  #preview li { margin: .25rem 0; }
+  #preview pre { background: #0f172a; border-radius: .75rem; padding: 1rem; overflow-x: auto; margin: .8rem 0; }
+  #preview pre code { font-size: .8rem; }
+  #preview code:not(pre code) { background: #f1f5f9; color: #db2777; padding: .1rem .35rem; border-radius: .3rem; font-size: .82rem; }
+</style>
+</head>
+<body class="flex h-screen flex-col bg-slate-100 text-slate-800">
+<!-- 顶栏 -->
+<header class="flex items-center gap-2 border-b border-slate-200 bg-white px-6 py-3">
+  <span class="text-xl">📓</span>
+  <h1 class="font-bold">Markdown 笔记</h1>
+  <span class="ml-auto text-xs text-slate-400">左栏编辑 · 右栏实时预览</span>
+</header>
+
+<!-- 左右分栏 -->
+<main class="grid flex-1 grid-cols-1 overflow-hidden md:grid-cols-2">
+  <section class="flex flex-col border-r border-slate-200 bg-white">
+    <div class="border-b border-slate-100 px-4 py-2 text-xs font-medium text-slate-400">✏️ 编辑区</div>
+    <textarea id="editor" spellcheck="false"
+      class="flex-1 resize-none p-5 font-mono text-sm leading-relaxed text-slate-700 outline-none"></textarea>
+  </section>
+  <section class="flex flex-col overflow-hidden bg-slate-50">
+    <div class="border-b border-slate-200 px-4 py-2 text-xs font-medium text-slate-400">👁️ 预览区</div>
+    <article id="preview" class="flex-1 overflow-y-auto p-6"></article>
+  </section>
+</main>
+
+<script>
+// 默认示例：标题 / 加粗 / 列表 / JS 代码块
+const sample = `# 前端学习笔记 📖
+
+这是一篇用 **Markdown** 书写的笔记，右侧实时预览，代码会自动高亮。
+
+## 今日重点
+
+- 学习 **Tailwind CSS** 的栅格布局
+- 复习 \`JavaScript\` 事件循环机制
+- 完成数字经济第三章阅读
+
+## 代码练习
+
+一个计算平均分的函数：
+
+\`\`\`javascript
+// 输入成绩数组，输出平均分
+function average(scores) {
+  const total = scores.reduce((sum, s) => sum + s, 0);
+  return (total / scores.length).toFixed(1);
+}
+
+const scores = [88, 92, 76, 95];
+console.log('平均分：', average(scores)); // 87.8
+\`\`\`
+
+> 坚持每天进步一点点 ✨
+`;
+
+const editor = document.getElementById('editor');
+const preview = document.getElementById('preview');
+marked.setOptions({ highlight: (code, lang) => hljs.getLanguage(lang) ? hljs.highlight(code, { language: lang }).value : code });
+
+function renderPreview() {
+  preview.innerHTML = marked.parse(editor.value);
+  preview.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+}
+editor.value = sample;
+editor.addEventListener('input', renderPreview);
+renderPreview();
+</script>
+</body>
+</html>
